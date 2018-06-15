@@ -1,5 +1,10 @@
+//Llamamos a prelude para acceder a funciones que nos dejarán leer
+//y escribir en el "stream".
+use std::io::prelude::*;
 //Tcp listener nos deja "escuchar" conexiones TCP.
-use std::net::TcpListener
+use std::net::TcpListener;
+use std::net::TcpStream;
+use std::fs::File;
 
 fn main() {
     //Aquí elegimos "escuchar" la dirección 127.0.0.2 en el puerto 7878"
@@ -14,7 +19,22 @@ fn main() {
     for stream in listener.incoming() {
         let stream = stream.unwrap();
 
-        println!("Se estableció una conexión");
+        handle_connection(stream);
     }
 
+}
+
+fn handle_connection(mut stream: TcpStream) {
+    let mut buffer = [0; 512];
+    stream.read(&mut buffer).unwrap();
+
+    let mut file = File::open("index.html");
+
+    let mut contents = String::new();
+    file.read_to_string(&mut contents).unwrap();
+
+    let response = format!("HTTP/1.1 200 OK\r\n\r\n{}", contents);
+
+    stream.write(response.as_bytes()).unwrap();
+    stream.flush().unwrap();
 }
