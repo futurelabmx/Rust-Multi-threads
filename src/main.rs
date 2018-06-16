@@ -31,7 +31,7 @@ fn handle_connection(mut stream: TcpStream) {
     let get = b"GET / HTTP/1.1\r\n";
 
     if buffer.starts_with(get) {
-        let mut file = File::open("index.html");
+        let mut file = File::open("index.html").unwrap();
 
         let mut contents = String::new();
         file.read_to_string(&mut contents).unwrap();
@@ -41,6 +41,16 @@ fn handle_connection(mut stream: TcpStream) {
         stream.write(response.as_bytes()).unwrap();
         stream.flush().unwrap();
     } else {
-        //Mas código luego
+    let status_line = "HTTP/1.1 404 ERROR A LA VERGA!\r\n\r\n";
+
+    let mut file = File::open("404.html").unwrap();
+    let mut contents = String::new();
+
+    file.read_to_string(&mut contents).unwrap();
+
+    let response = format!("{}{}", status_line, contents);
+
+    stream.write(response.as_bytes()).unwrap();
+    stream.flush().unwrap();
     }
 }
